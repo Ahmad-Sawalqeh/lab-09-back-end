@@ -28,6 +28,37 @@ app.get('/events', eventinfo);
 
 app.get('/movies', moviesinfo);
 
+app.get('/yelp', yelpinfo);
+
+/**************************************/
+// Yelp
+/**************************************/
+
+function yelpinfo(request,response){
+  getyelpinfo(request.query.data.search_query)
+    .then( yelpDate => {
+      response.status(200).json(yelpDate);
+    });
+}
+
+function getyelpinfo(location){
+  const url = `https://api.yelp.com/v3/businesses/search?location=${location}`;
+  return superagent.get(url)
+    .set('Authorization',`Bearer ${process.env.YELP_API_KEY}`)
+    .then( data => {
+      return data.body.businesses.map( yelp => {
+        return new Yelp(yelp);
+      });
+    });
+}
+
+function Yelp(business){
+  this.name = business.name;
+  this.image_url = business.image_url;
+  this.price = business.price;
+  this.rating = business.rating;
+  this.url = business.url;
+}
 
 /**************************************/
 // Movies
